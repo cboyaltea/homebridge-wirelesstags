@@ -161,7 +161,7 @@ WirelessTagAccessory.prototype.handleUpdate = function(deviceData) {
     this.tagType = deviceData.tagType;
     this.temperature = deviceData.temperature;
     this.name = deviceData.name;
-    this.evenState = deviceData.eventState;
+    this.eventState = deviceData.eventState;
     this.log(deviceData.name);
     this.log(deviceData.eventState);
     this.log(deviceData.alive);
@@ -184,12 +184,14 @@ WirelessTagAccessory.prototype.handleUpdate = function(deviceData) {
     }
     if(this.occupancyService != null && this.occupancyService != undefined) {
     	this.log("Occupancy Service");
-        if(deviceData.eventState == 5){
+        if(deviceData.eventState == 5 || deviceData.eventState == 3 ){
           this.log("Moved");
+	this.moved=true;
 	 this.occupancyService
             .setCharacteristic(Characteristic.OccupancyDetected, true);
 	} else { 
 	this.log(" NotMoved");
+	this.moved=false;
 	 this.occupancyService
             .setCharacteristic(Characteristic.OccupancyDetected, false);
 	}
@@ -209,6 +211,11 @@ WirelessTagAccessory.prototype.getHumidity = function(callback) {
 
 // Translates tag state into an occupancy value. If tag is inactive or out of range occupancy is false
 WirelessTagAccessory.prototype.getOccupancy = function(callback) {
+   this.log("Getting Occupancy update");
+   this.log("Moved ?");
+   this.log(this.moved);
+   this.log("isAlivee ?");
+   this.log(this.isAlive);
    var Moved = false; 
    var isAway = false;
     if(this.isOutOfRange == undefined) {
@@ -217,12 +224,10 @@ WirelessTagAccessory.prototype.getOccupancy = function(callback) {
         isAway = true;
     } else if(!this.isAlive) {
         isAway = true;
-    }
-    if (this.eventSate == 5 ){ 
-	Move = true;
-    }
-	
-    callback(null,Moved ? Characteristic.OccupancyDetected.OCCUPANCY_DETECTED : Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED);
+    } 
+
+    this.log(Characteristic.OccupancyDetected.OCCUPANCY_DETECTED );
+    callback(null,this.moved ? Characteristic.OccupancyDetected.OCCUPANCY_DETECTED : Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED);
 }
 
 // Sets up the information, temperature and occupancy services.
