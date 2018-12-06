@@ -1,14 +1,15 @@
-# 2018 Fork of homebridge-wireless-sensor-tag.
-# Renamed hombridge-wirelesstags 
+# 2018 Fork of rodtoll/homebridge-wireless-sensor-tag.
+# Renamed homebridge-wirelesstags 
 
 Homebridge platform for Wireless Sensor Tags. (http://wirelesstags.net/)
 
-Polls status of the wireless tags on a configurable interval and based on data from the tags determines occupancy of those tags + current temperature in degress celcius. 
-
-Occupancy is 0 if the tag is inactive or out of range. Otherwise it is triggered when the evenStatus change to Detected Value (5)
+Polls status of the wireless tags on a configurable interval and based on data from the tags determines occupancy of those tags + current temperature + Humidity + Light Level  
  
 # Installation
-No install for the moment
+
+npm will come soon
+
+
  
 # Configuration
 
