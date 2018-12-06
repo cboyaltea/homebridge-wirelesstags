@@ -162,8 +162,12 @@ WirelessTagAccessory.prototype.handleUpdate = function(deviceData) {
     this.temperature = deviceData.temperature;
     this.name = deviceData.name;
     this.eventState = deviceData.eventState;
+    this.lightEventState = deviceData.lightEventState;
+    this.lux = deviceData.lux;
     this.log(deviceData.name);
     this.log(deviceData.eventState);
+    this.log(deviceData.lux);
+    this.log(deviceData.lightEventState);
     this.log(deviceData.alive);
     if(deviceData.cap != undefined) {
         this.humidity = Math.round(deviceData.cap);
@@ -171,8 +175,13 @@ WirelessTagAccessory.prototype.handleUpdate = function(deviceData) {
         this.humidity = 0.0;
     }
     this.uuid_base = this.uuid;
-    
-    // Protections to ensure we don't set the current characteristic value whens services are not yet registered.
+
+      // Protections to ensure we don't set the current characteristic value whens services are not yet registered.
+     if(this.lightService != null && this.lightService != undefined) {
+        this.lightService
+            .setCharacteristic(Characteristic.CurrentAmbientLightLevel, this.lux);
+    }
+  
     if(this.tempService != null && this.tempService != undefined) {
         this.tempService
             .setCharacteristic(Characteristic.CurrentTemperature, this.temperature);    
@@ -230,7 +239,13 @@ WirelessTagAccessory.prototype.getOccupancy = function(callback) {
     callback(null,this.moved ? Characteristic.OccupancyDetected.OCCUPANCY_DETECTED : Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED);
 }
 
-// Sets up the information, temperature and occupancy services.
+// Handles getting the temperature in format needed by homebridge. Luckily this is just the raw value in degrees C
+WirelessTagAccessory.prototype.getLight = function(callback) {
+    this.log("Getting Light Level update");
+    callback(null,this.lux);
+}
+
+// Sets up the information, temperature , Humidity , Light and occupancy services.
 WirelessTagAccessory.prototype.getServices = function() {
     this.informationService = new Service.AccessoryInformation();
 
@@ -256,10 +271,20 @@ WirelessTagAccessory.prototype.getServices = function() {
     this.occupancyService
       .getCharacteristic(Characteristic.OccupancyDetected)
       .on('get', this.getOccupancy.bind(this));
+   
+if (this.lightEventState != 0){
+    this.lightService = new Service.LightSensor();   
+    this.lightService
+      .getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+      .on('get', this.getLight.bind(this));
+   }
 
-    return [this.informationService, this.tempService, this.occupancyService, this.humidityService];
+if (this.lightEventState != 0){
+
+    return [this.informationService, this.tempService, this.occupancyService, this.humidityService, this.lightService];
+}
+else  return [this.informationService, this.tempService, this.occupancyService, this.humidityService];
 }
 
 module.exports.platform = WirelessTagPlatform;
 module.exports.accessory = WirelessTagAccessory;
-
